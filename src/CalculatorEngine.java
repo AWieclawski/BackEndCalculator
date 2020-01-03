@@ -5,17 +5,19 @@ import java.util.Stack;
 
 public class CalculatorEngine {
 
-	final static String separator = " ";
+	final static String separator = "\\s";
 	final static String errValue = "Wrong value or operator";
 	final static String errDivZero = "Cannot divide by zero";
 	final static String nonNumerics = "[^\\d.]";
-	
+
 	public static String elementsProcessor(String expression) {
-		
+
 		String checkedExpression;
-		
-		if (expression.length()>0) checkedExpression = replaceMultiSpaces(expression);
-		else checkedExpression = expression;
+
+		if (expression.length() > 0)
+			checkedExpression = replaceMultiSpaces(expression);
+		else
+			checkedExpression = expression;
 
 		String[] elements = checkedExpression.split(separator);
 		Stack<String> values = new Stack<>();
@@ -23,12 +25,14 @@ public class CalculatorEngine {
 
 		for (int i = 0; i < elements.length; i++) {
 
-			if (checkBigDecimal(elements[i])) values.push(elements[i]);
-			
+			if (checkBigDecimal(elements[i]))
+				values.push(elements[i]);
+
 			// strings longer than a single operator and not recognized as numbers
 			// are reduced to zero
-			if (!checkBigDecimal(elements[i]) && !checkIfOperator(elements[i])) return errValue;
-			
+			if (!checkBigDecimal(elements[i]) && !checkIfOperator(elements[i]))
+				return errValue;
+
 			else if (checkSeparator(elements[i]))
 				continue;
 
@@ -44,84 +48,75 @@ public class CalculatorEngine {
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
 				operators.pop();
-				
-				// finish operation waiting before bracket or brackets, if any 
-		        while (!operators.empty() && !checkBracket(operators.peek())) 
-		            values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
+
+				// finish operation waiting before bracket or brackets, if any
+				while (!operators.empty() && !checkBracket(operators.peek()))
+					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 			}
-			
+
 			else if (checkOperator(elements[i])) {
-	            // While top operator from 'operators' stack has the same or higher priority 
-                // to current element and operator, as well. Use the operator from 'operators' 
-                // with top two elements in 'values' stack 
-                while (!operators.empty() && higherPriorityOfOp(elements[i], operators.peek())) 
-                    values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
-                
-                // Push current element to 'operators'. 
-                operators.push(elements[i]); 
+				// While top operator from 'operators' stack has the same or higher priority
+				// to current element and operator, as well. Use the operator from 'operators'
+				// with top two elements in 'values' stack
+				while (!operators.empty() && higherPriorityOfOp(elements[i], operators.peek()))
+					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
+
+				// Push current element to 'operators'.
+				operators.push(elements[i]);
 			}
 		}
-		
-        while (!operators.empty()) 
-            values.push(workingOnStacks(operators.pop(), values.pop(), values.pop())); 
+
+		while (!operators.empty())
+			values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 		return values.pop();
 	}
-	
+
 	private static String replaceMultiSpaces(String testedElement) {
-			return testedElement.replaceAll("( )+", " ").trim();
-		}
-	
+		return testedElement.replaceAll("(\\s)+", " ").trim();
+	}
+
 	private static boolean checkBigDecimal(String testedElement) {
 		try {
-			new BigDecimal (testedElement);
+			new BigDecimal(testedElement);
 			return true;
 		} catch (NumberFormatException e) {
 			return false;
 		}
 	}
-	
+
 	private static BigDecimal stringToBD(String testedElement) {
 		try {
-			return new BigDecimal (testedElement);
+			return new BigDecimal(testedElement);
 		} catch (NumberFormatException e) {
-			return new BigDecimal (testedElement.replaceAll(nonNumerics, ""));
+			return new BigDecimal(testedElement.replaceAll(nonNumerics, null));
 		}
 	}
 
 	private static boolean checkOperator(String testedElement) {
-		if (testedElement.equals("+") 
-				|| testedElement.equals("-") 
-				|| testedElement.equals("*") 
-				|| testedElement.equals("/"))
+		if (testedElement.equals("+") || testedElement.equals("-") || testedElement.equals("*")
+				|| testedElement.equals("/") || testedElement.equals("^"))
 			return true;
 		else
 			return false;
 	}
 
 	private static boolean checkBracket(String testedElement) {
-		if (testedElement.equals("(") 
-				|| testedElement.equals(")"))
+		if (testedElement.equals("(") || testedElement.equals(")"))
 			return true;
 		else
 			return false;
-	}	
-	
-	private static boolean checkLowLevelOp(String testedElement) {
-		if (testedElement.equals("+") 
-				|| testedElement.equals("-"))
-			return true;
-		else
-			return false;
-	}	
-	
-	private static boolean checkHighLevelOp(String testedElement) {
-		if (testedElement.equals("*") 
-				|| testedElement.equals("/"))
-			return true;
-		else
-			return false;
-	}	
-	
+	}
+
+	private static int checkLevelOp(String testedElement) {
+		if (testedElement.equals("+") || testedElement.equals("-"))
+			return 1;
+		if (testedElement.equals("*") || testedElement.equals("/"))
+			return 2;
+		if (testedElement.equals("^"))
+			return 3;
+		return 0;
+	}
+
 	private static boolean checkIfOperator(String testedElement) {
 		if (checkOperator(testedElement) || checkBracket(testedElement))
 			return true;
@@ -142,8 +137,7 @@ public class CalculatorEngine {
 	{
 		if (checkBracket(followingOp))
 			return false;
-		if (checkHighLevelOp(previousOp) 
-				&& checkLowLevelOp(followingOp))
+		if (checkLevelOp(followingOp) < checkLevelOp(previousOp))
 			return false;
 		else
 			return true;
@@ -153,12 +147,16 @@ public class CalculatorEngine {
 	// Apply an operator 'op' on operands 'a' and 'b'.
 	// Returns the result.
 	{
-		BigDecimal aBD,bBD;
-		if (checkBigDecimal(a)) {aBD = stringToBD (a);}
-		else return errValue;
-		if (checkBigDecimal(b)) {bBD = stringToBD(b);}
-		else return errValue;
-		
+		BigDecimal aBD, bBD;
+		if (checkBigDecimal(a)) {
+			aBD = stringToBD(a);
+		} else
+			return errValue;
+		if (checkBigDecimal(b)) {
+			bBD = stringToBD(b);
+		} else
+			return errValue;
+
 		switch (op) {
 		case "+":
 			return aBD.add(bBD).toPlainString();
@@ -167,8 +165,12 @@ public class CalculatorEngine {
 		case "*":
 			return aBD.multiply(bBD).toPlainString();
 		case "/":
-			if (bBD.equals(BigDecimal.ZERO)) return errDivZero;
-			else return aBD.divide(bBD).toPlainString();
+			if (bBD.equals(BigDecimal.ZERO))
+				return errDivZero;
+			else
+				return aBD.divide(bBD).toPlainString();
+		case "^":
+			return aBD.pow(bBD.intValue()).toPlainString();
 		}
 		return BigDecimal.ZERO.toPlainString();
 	}
@@ -188,6 +190,8 @@ public class CalculatorEngine {
 		tests.add("2 - 6"); // -4
 		tests.add("2 - 3 - 4"); // -5
 		tests.add("10 * 5 / 5"); // 10
+		tests.add("10 - 2 * 3"); // 4
+		tests.add("10 * 2 ^ 3"); // 80
 		tests.add("10 * 5 / 0"); // "Cannot divide by zero"
 		tests.add("22 * 10 / ( 5 - ( 2 + 3 ) )"); // "Cannot divide by zero"
 		tests.add("2 / 2 + 3 * 4"); // 13
@@ -205,11 +209,11 @@ public class CalculatorEngine {
 		tests.add("3.5 - 1,3 - .4"); // Wrong value
 		tests.add("1 # 2 - .4"); // Wrong value
 		tests.add(" "); // Wrong value
-		
+		tests.add(""); // Wrong value
+
 		System.out.println("Evaluate:");
 		for (String test : tests) {
 			System.out.println(test.toString() + is + CalculatorEngine.elementsProcessor(test));
 		}
 	}
-
 }
