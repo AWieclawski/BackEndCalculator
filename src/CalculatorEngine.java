@@ -50,8 +50,14 @@ public class CalculatorEngine {
 				operators.pop();
 
 				// finish operation waiting before bracket or brackets, if any
-				while (!operators.empty() && !checkBracket(operators.peek()))
-					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
+				if (i == elements.length - 1) {	// check if current is the last operation
+					while (!operators.empty() && !checkBracket(operators.peek()))
+						values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
+				} else {	// check if following operator has higher priority than current
+					while (!operators.empty() && !checkBracket(operators.peek())
+							&& higherPriorityOfOp(elements[i + 1], operators.peek()))
+						values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
+				}
 			}
 
 			else if (checkOperator(elements[i])) {
@@ -192,6 +198,7 @@ public class CalculatorEngine {
 		tests.add("10 * 5 / 5"); // 10
 		tests.add("10 - 2 * 3"); // 4
 		tests.add("10 * 2 ^ 3"); // 80
+		tests.add("2 * ( 5 - 2 ) ^ 3"); // 54
 		tests.add("10 * 5 / 0"); // "Cannot divide by zero"
 		tests.add("22 * 10 / ( 5 - ( 2 + 3 ) )"); // "Cannot divide by zero"
 		tests.add("2 / 2 + 3 * 4"); // 13
