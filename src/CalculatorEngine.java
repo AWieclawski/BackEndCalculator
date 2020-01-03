@@ -203,7 +203,8 @@ public class CalculatorEngine {
 		tests.add("22 * 10 / ( 5 - ( 2 + 3 ) )"); // "Cannot divide by zero"
 		tests.add("2 / 2 + 3 * 4"); // 13
 		tests.add("5 / ( 2 + 3 ) * ( 5 - 1 )"); // 4 - more brackets
-		tests.add("15 / ( ( 2 + 3 ) * ( 2 - 1 ) )"); // 3 - multilevel brackets
+		tests.add("1 + 20 / ( ( 2 + 3 ) * ( 4 - 2 ) )"); // 3 - multilevel brackets
+		tests.add("20 / ( ( 2 + 3 ) * ( 4 - 2 ) ^ 3 )"); // 0.5 - multilevel brackets
 		tests.add("7.7 - 3.3 - 4.4"); // 0
 		tests.add("8.8 - 3.3 - .4"); // 5.1
 		tests.add("100 * ( 2 + 12 )"); // 1400
