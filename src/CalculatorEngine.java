@@ -28,8 +28,7 @@ public class CalculatorEngine {
 			if (checkBigDecimal(elements[i]))
 				values.push(elements[i]);
 
-			// strings longer than a single operator and not recognized as numbers
-			// are reduced to zero
+			// If neither numeric nor operator recognized, returns error communicate
 			if (!checkBigDecimal(elements[i]) && !checkIfOperator(elements[i]))
 				return errValue;
 
@@ -55,7 +54,7 @@ public class CalculatorEngine {
 						values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				} else {	// check if following operator has higher priority than current
 					while (!operators.empty() && !checkBracket(operators.peek())
-							&& higherPriorityOfOp(elements[i + 1], operators.peek()))
+							&& higherPriorityOp(elements[i + 1], operators.peek()))
 						values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				}
 			}
@@ -64,7 +63,7 @@ public class CalculatorEngine {
 				// While top operator from 'operators' stack has the same or higher priority
 				// to current element and operator, as well. Use the operator from 'operators'
 				// with top two elements in 'values' stack
-				while (!operators.empty() && higherPriorityOfOp(elements[i], operators.peek()))
+				while (!operators.empty() && higherPriorityOp(elements[i], operators.peek()))
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 
 				// Push current element to 'operators'.
@@ -137,7 +136,7 @@ public class CalculatorEngine {
 			return false;
 	}
 
-	public static boolean higherPriorityOfOp(String previousOp, String followingOp)
+	public static boolean higherPriorityOp(String previousOp, String followingOp)
 	// If 'followingOp' has higher or the same operation priority as 'previousOp',
 	// returns true. Otherwise returns false.
 	{
