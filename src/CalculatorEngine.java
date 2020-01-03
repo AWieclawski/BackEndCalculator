@@ -6,20 +6,25 @@ import java.util.Stack;
 public class CalculatorEngine {
 
 	final static String separator = " ";
-	final static String errValue = "Wrong value or operator sign";
+	final static String errValue = "Wrong value or operator";
+	final static String errDivZero = "Cannot divide by zero";
+	final static String nonNumerics = "[^\\d.]";
 	
 	public static String elementsProcessor(String expression) {
+		
+		String checkedExpression;
+		
+		if (expression.length()>0) checkedExpression = replaceMultiSpaces(expression);
+		else checkedExpression = expression;
 
-		String[] elements = expression.split(separator);
-		Stack<BigDecimal> values = new Stack<>();
+		String[] elements = checkedExpression.split(separator);
+		Stack<String> values = new Stack<>();
 		Stack<String> operators = new Stack<>();
 
 		for (int i = 0; i < elements.length; i++) {
 
-			if (checkBigDecimal(elements[i])) 
-			{BigDecimal bd = new BigDecimal (elements[i]);
-				values.push(bd);
-			}
+			if (checkBigDecimal(elements[i])) values.push(elements[i]);
+			
 			// strings longer than a single operator and not recognized as numbers
 			// are reduced to zero
 			if (!checkBigDecimal(elements[i]) && !checkIfOperator(elements[i])) return errValue;
@@ -39,6 +44,10 @@ public class CalculatorEngine {
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
 				operators.pop();
+				
+				// finish operation waiting before bracket or brackets, if any 
+		        while (!operators.empty() && !checkBracket(operators.peek())) 
+		            values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 			}
 			
 			else if (checkOperator(elements[i])) {
@@ -55,15 +64,27 @@ public class CalculatorEngine {
 		
         while (!operators.empty()) 
             values.push(workingOnStacks(operators.pop(), values.pop(), values.pop())); 
-		return values.pop().toString();
+		return values.pop();
 	}
-
+	
+	private static String replaceMultiSpaces(String testedElement) {
+			return testedElement.replaceAll("( )+", " ").trim();
+		}
+	
 	private static boolean checkBigDecimal(String testedElement) {
 		try {
 			new BigDecimal (testedElement);
 			return true;
 		} catch (NumberFormatException e) {
 			return false;
+		}
+	}
+	
+	private static BigDecimal stringToBD(String testedElement) {
+		try {
+			return new BigDecimal (testedElement);
+		} catch (NumberFormatException e) {
+			return new BigDecimal (testedElement.replaceAll(nonNumerics, ""));
 		}
 	}
 
@@ -112,23 +133,28 @@ public class CalculatorEngine {
 			return true;
 	}
 
-	public static BigDecimal workingOnStacks(String op, BigDecimal b, BigDecimal a)
+	public static String workingOnStacks(String op, String b, String a)
 	// Apply an operator 'op' on operands 'a' and 'b'.
 	// Returns the result.
 	{
+		BigDecimal aBD,bBD;
+		if (checkBigDecimal(a)) {aBD = stringToBD (a);}
+		else return errValue;
+		if (checkBigDecimal(b)) {bBD = stringToBD(b);}
+		else return errValue;
+		
 		switch (op) {
 		case "+":
-			return a.add(b);
+			return aBD.add(bBD).toPlainString();
 		case "-":
-			return a.subtract(b);
+			return aBD.subtract(bBD).toPlainString();
 		case "*":
-			return a.multiply(b);
+			return aBD.multiply(bBD).toPlainString();
 		case "/":
-			if (b.equals(BigDecimal.ZERO))
-				throw new UnsupportedOperationException("Cannot divide by zero");
-			return a.divide(b);
+			if (bBD.equals(BigDecimal.ZERO)) return errDivZero;
+			else return aBD.divide(bBD).toPlainString();
 		}
-		return BigDecimal.ZERO;
+		return BigDecimal.ZERO.toPlainString();
 	}
 
 	public static void main(String[] args) {
@@ -140,13 +166,17 @@ public class CalculatorEngine {
 		tests.add("127"); // 127
 		tests.add("-127"); // -127
 		tests.add("2 + 3"); // 5
-		tests.add("2 + 3 +  4"); // 9
+		tests.add("2 + 3 +  4"); // 9 - double spaces removed
+		tests.add("  7  + 3 -   4"); // 6 - initial and more multispaces removed
 		tests.add("2 + 3 + 4 + 5"); // 14
 		tests.add("2 - 6"); // -4
 		tests.add("2 - 3 - 4"); // -5
 		tests.add("10 * 5 / 5"); // 10
-//		tests.add("10 * 5 / 0"); // 10
+		tests.add("10 * 5 / 0"); // "Cannot divide by zero"
+		tests.add("22 * 10 / ( 5 - 5 )"); // "Cannot divide by zero"
 		tests.add("2 / 2 + 3 * 4"); // 13
+		tests.add("5 / ( 2 + 3 ) * ( 5 - 1 )"); // 4 - more brackets
+		tests.add("15 / ( ( 2 + 3 ) * ( 2 - 1 ) )"); // 3 - multilevel brackets
 		tests.add("7.7 - 3.3 - 4.4"); // 0
 		tests.add("8.8 - 3.3 - .4"); // 5.1
 		tests.add("100 * ( 2 + 12 )"); // 1400
