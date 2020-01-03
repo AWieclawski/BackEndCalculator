@@ -1,2 +1,2 @@
 # backEndCalculator
-It supports addition, subtraction, multiplication and division, and also recognizes the priority of operations in parentheses and exponential form. Requires separating numbers and operators with a separator that can be defined.
+It supports addition, subtraction, multiplication, division and riase to power. It recognizes the priority of operations, multi level brackets and exponential form of numbers. Requires separator between elements of expression. Unnecessary separtors can be identified and removed from operation.
