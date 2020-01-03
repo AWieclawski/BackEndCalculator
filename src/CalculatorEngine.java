@@ -106,6 +106,22 @@ public class CalculatorEngine {
 			return false;
 	}	
 	
+	private static boolean checkLowLevelOp(String testedElement) {
+		if (testedElement.equals("+") 
+				|| testedElement.equals("-"))
+			return true;
+		else
+			return false;
+	}	
+	
+	private static boolean checkHighLevelOp(String testedElement) {
+		if (testedElement.equals("*") 
+				|| testedElement.equals("/"))
+			return true;
+		else
+			return false;
+	}	
+	
 	private static boolean checkIfOperator(String testedElement) {
 		if (checkOperator(testedElement) || checkBracket(testedElement))
 			return true;
@@ -124,10 +140,10 @@ public class CalculatorEngine {
 	// If 'followingOp' has higher or the same operation priority as 'previousOp',
 	// returns true. Otherwise returns false.
 	{
-		if (followingOp.equals("(") || followingOp.equals(")"))
+		if (checkBracket(followingOp))
 			return false;
-		if ((previousOp.equals("*") || previousOp.equals("/") 
-				&& (followingOp.equals("+") || followingOp.equals("-"))))
+		if (checkHighLevelOp(previousOp) 
+				&& checkLowLevelOp(followingOp))
 			return false;
 		else
 			return true;
@@ -173,7 +189,7 @@ public class CalculatorEngine {
 		tests.add("2 - 3 - 4"); // -5
 		tests.add("10 * 5 / 5"); // 10
 		tests.add("10 * 5 / 0"); // "Cannot divide by zero"
-		tests.add("22 * 10 / ( 5 - 5 )"); // "Cannot divide by zero"
+		tests.add("22 * 10 / ( 5 - ( 2 + 3 ) )"); // "Cannot divide by zero"
 		tests.add("2 / 2 + 3 * 4"); // 13
 		tests.add("5 / ( 2 + 3 ) * ( 5 - 1 )"); // 4 - more brackets
 		tests.add("15 / ( ( 2 + 3 ) * ( 2 - 1 ) )"); // 3 - multilevel brackets
@@ -188,8 +204,9 @@ public class CalculatorEngine {
 		tests.add("12 + 3oo - 5"); // Wrong value
 		tests.add("3.5 - 1,3 - .4"); // Wrong value
 		tests.add("1 # 2 - .4"); // Wrong value
+		tests.add(" "); // Wrong value
 		
-		System.out.println("evaluate:");
+		System.out.println("Evaluate:");
 		for (String test : tests) {
 			System.out.println(test.toString() + is + CalculatorEngine.elementsProcessor(test));
 		}
