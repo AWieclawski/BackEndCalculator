@@ -27,6 +27,7 @@ public class CalculatorEngine {
 		String[] elements = checkedExpression.split(separator);
 		Stack<String> values = new Stack<>();
 		Stack<String> operators = new Stack<>();
+		Stack<String> bracketOpen = new Stack<>();		
 
 		for (int i = 0; i < elements.length; i++) {
 
@@ -49,8 +50,9 @@ public class CalculatorEngine {
 			else if (checkSeparator(elements[i]))
 				continue;
 
-			else if (elements[i].equals("("))
-				operators.push(elements[i]);
+			else if (elements[i].equals("(")) {
+				bracketOpen.push(elements[i]); // brackets begin stacked 
+				operators.push(elements[i]);}
 
 			else if (elements[i].equals(")"))
 			// If closing bracket ")" is encountered,
@@ -60,6 +62,7 @@ public class CalculatorEngine {
 				while (!operators.peek().equals("("))
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
+				bracketOpen.pop();				
 				operators.pop();
 
 				// finish operation waiting before bracket or brackets, if any
@@ -84,7 +87,7 @@ public class CalculatorEngine {
 				operators.push(elements[i]);
 			}
 		}
-
+		if (!bracketOpen.empty()) return errValue4; // if bracket not closed
 		while (!operators.empty())
 			values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 		return values.pop();
@@ -238,6 +241,7 @@ public class CalculatorEngine {
 		tests.add("1 # 2 - .4"); // Found neither numeric, nor operator element
 		tests.add("1 * * 2 - .4"); // There is no value between operators
 		tests.add("-10  2.5 - 1.1 )"); // There is no operator between values : 
+		tests.add("-10 *  ( ( 2.5 - 1.1 )"); //	Bracket not closed	
 		tests.add(" "); // Wrong value
 		tests.add(""); // Wrong value
 
