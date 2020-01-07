@@ -11,7 +11,8 @@ public class CalculatorEngine {
 	final static String errValue2 = "There is no operator between values: ";
 	final static String errValue3 = "There is no value between operators: ";
 	final static String errValue4 = "Bracket not closed";
-	final static String errValue5 = "Found no numeric value in operation";
+	final static String errValue5 = "Closing bracket unnecessary";
+	final static String errValue6 = "Found no numeric value in operation";
 	final static String errDivZero = "Cannot divide by zero";
 	final static String nonNumerics = "[^\\d.]";
 
@@ -27,7 +28,7 @@ public class CalculatorEngine {
 		String[] elements = checkedExpression.split(separator);
 		Stack<String> values = new Stack<>();
 		Stack<String> operators = new Stack<>();
-		Stack<String> bracketOpen = new Stack<>();		
+		Stack<String> bracketOpen = new Stack<>();
 
 		for (int i = 0; i < elements.length; i++) {
 
@@ -35,34 +36,35 @@ public class CalculatorEngine {
 				values.push(elements[i]);
 
 			// If neither numeric nor operator recognized, returns error communicate
-			if (!checkBigDecimal(elements[i]) && !checkOperatorOrValue(elements[i]))
-				return errValue1;
+			if (!checkBigDecimal(elements[i]) && !checkOperatorOrBracket(elements[i]))
+				return errValue1.concat(valueSeparator).concat(elements[i]);
 
+			// error, if between values there is no operator
 			if (!checkIfLastElement(elements, i) && checkBigDecimal(elements[i]) && checkBigDecimal(elements[i + 1]))
-				return errValue2.concat(elements[i]).concat(valueSeparator)
-						.concat(elements[i + 1]); // error, if between values there is no
-			// operator
-
+				return errValue2.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]); 
+			
+			// error, if between operators there is no value
 			if (!checkIfLastElement(elements, i) && checkOperator(elements[i]) && checkOperator(elements[i + 1]))
-				return errValue3.concat(elements[i]).concat(valueSeparator)
-						.concat(elements[i + 1]); // error, if between operators there is no value
+				return errValue3.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]); 
 
 			else if (checkSeparator(elements[i]))
 				continue;
 
 			else if (elements[i].equals("(")) {
-				bracketOpen.push(elements[i]); // brackets begin stacked 
-				operators.push(elements[i]);}
+				bracketOpen.push(elements[i]); // brackets begin stacked
+				operators.push(elements[i]);
+			}
 
 			else if (elements[i].equals(")"))
 			// If closing bracket ")" is encountered,
 			// takes operators and operands from stacks
 			// till open bracket "("
 			{
+				if (bracketOpen.empty()) return errValue5;
 				while (!operators.peek().equals("("))
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
-				bracketOpen.pop();				
+				bracketOpen.pop();
 				operators.pop();
 
 				// finish operation waiting before bracket or brackets, if any
@@ -87,7 +89,8 @@ public class CalculatorEngine {
 				operators.push(elements[i]);
 			}
 		}
-		if (!bracketOpen.empty()) return errValue4; // if bracket not closed
+		if (!bracketOpen.empty())
+			return errValue4; // if bracket not closed
 		while (!operators.empty())
 			values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 		return values.pop();
@@ -139,7 +142,7 @@ public class CalculatorEngine {
 		return 0;
 	}
 
-	private static boolean checkOperatorOrValue(String testedElement) {
+	private static boolean checkOperatorOrBracket(String testedElement) {
 		if (checkOperator(testedElement) || checkBracket(testedElement))
 			return true;
 		else
@@ -180,11 +183,11 @@ public class CalculatorEngine {
 		if (checkBigDecimal(a)) {
 			aBD = stringToBD(a);
 		} else
-			return errValue5;
+			return errValue6;
 		if (checkBigDecimal(b)) {
 			bBD = stringToBD(b);
 		} else
-			return errValue5;
+			return errValue6;
 
 		switch (op) {
 		case "+":
@@ -240,8 +243,9 @@ public class CalculatorEngine {
 		tests.add("3.5 - 1,3 - .4"); // Found neither numeric, nor operator element
 		tests.add("1 # 2 - .4"); // Found neither numeric, nor operator element
 		tests.add("1 * * 2 - .4"); // There is no value between operators
-		tests.add("-10  2.5 - 1.1 )"); // There is no operator between values : 
-		tests.add("-10 *  ( ( 2.5 - 1.1 )"); //	Bracket not closed	
+		tests.add("-10  2.5 - 1.1 )"); // There is no operator between values :
+		tests.add("-10 *  ( ( 2.5 - 1.1 )"); // Bracket not closed
+		tests.add("-10 * ( 2.5 - 1.1 ) ) )"); // Closing bracket unnecessary
 		tests.add(" "); // Wrong value
 		tests.add(""); // Wrong value
 
