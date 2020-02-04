@@ -16,7 +16,23 @@ public class CalculatorEngine {
 	final static String errDivZero = "Cannot divide by zero";
 	final static String nonNumerics = "[^\\d.]";
 
-	public static String elementsProcessor(String expression) {
+	public CalculatorEngine(String expression) {
+		setX(expression);
+	}
+
+	private static String x;
+
+	public static String getX() {
+		return x;
+	}
+
+	public void setX(String x) {
+		CalculatorEngine.x = x;
+	}
+
+	public String elementsProcessor() {
+
+		String expression = CalculatorEngine.getX();
 
 		String checkedExpression;
 
@@ -41,11 +57,11 @@ public class CalculatorEngine {
 
 			// error, if between values there is no operator
 			if (!checkIfLastElement(elements, i) && checkBigDecimal(elements[i]) && checkBigDecimal(elements[i + 1]))
-				return errValue2.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]); 
-			
+				return errValue2.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]);
+
 			// error, if between operators there is no value
 			if (!checkIfLastElement(elements, i) && checkOperator(elements[i]) && checkOperator(elements[i + 1]))
-				return errValue3.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]); 
+				return errValue3.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]);
 
 			else if (checkSeparator(elements[i]))
 				continue;
@@ -60,7 +76,8 @@ public class CalculatorEngine {
 			// takes operators and operands from stacks
 			// till open bracket "("
 			{
-				if (bracketOpen.empty()) return errValue5;
+				if (bracketOpen.empty())
+					return errValue5;
 				while (!operators.peek().equals("("))
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
@@ -96,11 +113,11 @@ public class CalculatorEngine {
 		return values.pop();
 	}
 
-	private static String replaceMultiSpaces(String testedElement) {
+	private String replaceMultiSpaces(String testedElement) {
 		return testedElement.replaceAll("(\\s)+", " ").trim();
 	}
 
-	private static boolean checkBigDecimal(String testedElement) {
+	private boolean checkBigDecimal(String testedElement) {
 		try {
 			new BigDecimal(testedElement);
 			return true;
@@ -109,7 +126,7 @@ public class CalculatorEngine {
 		}
 	}
 
-	private static BigDecimal stringToBD(String testedElement) {
+	private BigDecimal stringToBD(String testedElement) {
 		try {
 			return new BigDecimal(testedElement);
 		} catch (NumberFormatException e) {
@@ -117,7 +134,7 @@ public class CalculatorEngine {
 		}
 	}
 
-	private static boolean checkOperator(String testedElement) {
+	private boolean checkOperator(String testedElement) {
 		if (testedElement.equals("+") || testedElement.equals("-") || testedElement.equals("*")
 				|| testedElement.equals("/") || testedElement.equals("^"))
 			return true;
@@ -125,14 +142,14 @@ public class CalculatorEngine {
 			return false;
 	}
 
-	private static boolean checkBracket(String testedElement) {
+	private boolean checkBracket(String testedElement) {
 		if (testedElement.equals("(") || testedElement.equals(")"))
 			return true;
 		else
 			return false;
 	}
 
-	private static int checkLevelOp(String testedElement) {
+	private int checkLevelOp(String testedElement) {
 		if (testedElement.equals("+") || testedElement.equals("-"))
 			return 1;
 		if (testedElement.equals("*") || testedElement.equals("/"))
@@ -142,28 +159,28 @@ public class CalculatorEngine {
 		return 0;
 	}
 
-	private static boolean checkOperatorOrBracket(String testedElement) {
+	private boolean checkOperatorOrBracket(String testedElement) {
 		if (checkOperator(testedElement) || checkBracket(testedElement))
 			return true;
 		else
 			return false;
 	}
 
-	private static boolean checkSeparator(String testedElement) {
+	private boolean checkSeparator(String testedElement) {
 		if (testedElement.equals(separator))
 			return true;
 		else
 			return false;
 	}
 
-	private static boolean checkIfLastElement(String[] elements, int i) {
+	private boolean checkIfLastElement(String[] elements, int i) {
 		if (i == elements.length - 1)
 			return true;
 		else
 			return false;
 	}
 
-	public static boolean higherPriorityOp(String previousOp, String followingOp)
+	public boolean higherPriorityOp(String previousOp, String followingOp)
 	// If 'followingOp' has higher or the same operation priority as 'previousOp',
 	// returns true. Otherwise returns false.
 	{
@@ -175,7 +192,7 @@ public class CalculatorEngine {
 			return true;
 	}
 
-	public static String workingOnStacks(String op, String b, String a)
+	public String workingOnStacks(String op, String b, String a)
 	// Apply an operator 'op' on operands 'a' and 'b'.
 	// Returns the result.
 	{
@@ -212,46 +229,48 @@ public class CalculatorEngine {
 
 		String is = " = ";
 
-		List<String> tests = new ArrayList<>();
-		tests.add("127"); // 127
-		tests.add("-127"); // -127
-		tests.add("2 + 3"); // 5
-		tests.add("2 + 3 +  4"); // 9
-		tests.add("  7  + 3 -   4"); // 6
-		tests.add("2 + 3 + 4 + 5"); // 14
-		tests.add("2 - 6"); // -4
-		tests.add("2 - 3 - 4"); // -5
-		tests.add("10 * 5 / 5"); // 10
-		tests.add("10 - 2 * 3"); // 4
-		tests.add("10 * 2 ^ 3"); // 80
-		tests.add("2 * ( 5 - 2 ) ^ 3"); // 54
-		tests.add("10 * 5 / 0"); // "Cannot divide by zero"
-		tests.add("22 * 10 / ( 5 - ( 2 + 3 ) )"); // "Cannot divide by zero"
-		tests.add("2 / 2 + 3 * 4"); // 13
-		tests.add("5 / ( 2 + 3 ) * ( 5 - 1 )"); // 4
-		tests.add("1 + 20 / ( ( 2 + 3 ) * ( 4 - 2 ) )"); // 3
-		tests.add("20 / ( ( 2 + 3 ) * ( 4 - 2 ) ^ 3 )"); // 0.5
-		tests.add("7.7 - 3.3 - 4.4"); // 0
-		tests.add("8.8 - 3.3 - .4"); // 5.1
-		tests.add("100 * ( 2 + 12 )"); // 1400
-		tests.add("100 * ( 2.1 + 12 ) / 20 + 2"); // 72.5
-		tests.add("-10 * ( 2.5 - 1.1 )"); // -14
-		tests.add("1.652335819E9"); // 1652335819
-		tests.add("-2.4323387584534e11"); // -243233875845.34
-		tests.add("-4.4323387584534exp9"); // Wrong value
-		tests.add("12 + 3oo - 5"); // Found neither numeric, nor operator element
-		tests.add("3.5 - 1,3 - .4"); // Found neither numeric, nor operator element
-		tests.add("1 # 2 - .4"); // Found neither numeric, nor operator element
-		tests.add("1 * * 2 - .4"); // There is no value between operators
-		tests.add("-10  2.5 - 1.1 )"); // There is no operator between values :
-		tests.add("-10 *  ( ( 2.5 - 1.1 )"); // Bracket not closed
-		tests.add("-10 * ( 2.5 - 1.1 ) ) )"); // Closing bracket unnecessary
-		tests.add(" "); // Wrong value
-		tests.add(""); // Wrong value
+		List<String[]> tests = new ArrayList<>();
+		tests.add(new String[] { "127", "127" }); // 127
+		tests.add(new String[] { "-127", "-127" }); // -127
+		tests.add(new String[] { "2 + 3", "5" }); // 5
+		tests.add(new String[] { "2 + 3 +  4", "9" }); // 9
+		tests.add(new String[] { "  7  + 3 -   4", "6" }); // 6
+		tests.add(new String[] { "2 + 3 + 4 + 5", "14" }); // 14
+		tests.add(new String[] { "2 - 6", "-4" }); // -4
+		tests.add(new String[] { "2 - 3 - 4", "-5" }); // -5
+		tests.add(new String[] { "10 * 5 / 5", "10" }); // 10
+		tests.add(new String[] { "10 - 2 * 3", "4" }); // 4
+		tests.add(new String[] { "10 * 2 ^ 3", "80" }); // 80
+		tests.add(new String[] { "2 * ( 5 - 2 ) ^ 3", "54" }); // 54
+		tests.add(new String[] { "10 * 5 / 0", errDivZero }); // "Cannot divide by zero"
+		tests.add(new String[] { "22 * 10 / ( 5 - ( 2 + 3 ) )", errDivZero }); // "Cannot divide by zero"
+		tests.add(new String[] { "2 / 2 + 3 * 4", "13" }); // 13
+		tests.add(new String[] { "5 / ( 2 + 3 ) * ( 5 - 1 )", "4" }); // 4
+		tests.add(new String[] { "1 + 20 / ( ( 2 + 3 ) * ( 4 - 2 ) )", "3" }); // 3
+		tests.add(new String[] { "20 / ( ( 2 + 3 ) * ( 4 - 2 ) ^ 3 )", "0.5" }); // 0.5
+		tests.add(new String[] { "7.7 - 3.3 - 4.4", "0.0" }); // 0.0
+		tests.add(new String[] { "8.8 - 3.3 - .4", "5.1" }); // 5.1
+		tests.add(new String[] { "100 * ( 2 + 12 )", "1400" }); // 1400
+		tests.add(new String[] { "100 * ( 2.1 + 12 ) / 20 + 2", "72.5" }); // 72.5
+		tests.add(new String[] { "-10 * ( 2.5 - 1.1 )", "-14.0" }); // -14.0
+		tests.add(new String[] { "1.652335819E9", "1.652335819E9" }); // 1.652335819E9
+		tests.add(new String[] { "-2.4323387584534e11", "-2.4323387584534e11" }); // -2.4323387584534e11
+		tests.add(new String[] { "-4.4323387584534exp9", errValue1+valueSeparator+"-4.4323387584534exp9" }); // Found neither numeric, nor operator element
+		tests.add(new String[] { "12 + 3oo - 5", errValue1+valueSeparator+"3oo" }); // Found neither numeric, nor operator element
+		tests.add(new String[] { "3.5 - 1,3 - .4", errValue1+valueSeparator+"1,3" }); // Found neither numeric, nor operator element
+		tests.add(new String[] { "1 # 2 - .4", errValue1+valueSeparator+"#" }); // Found neither numeric, nor operator element
+		tests.add(new String[] { "1 * * 2 - .4", errValue3+"*"+valueSeparator+"*" }); // There is no value between operators
+		tests.add(new String[] { "-10  2.5 - 1.1 )", errValue2+"-10"+valueSeparator+"2.5" }); // There is no operator between values :
+		tests.add(new String[] { "-10 *  ( ( 2.5 - 1.1 )", errValue4 }); // Bracket not closed
+		tests.add(new String[] { "-10 * ( 2.5 - 1.1 ) ) )", errValue5 }); // Closing bracket unnecessary
+		tests.add(new String[] { " ", errValue1+valueSeparator }); // Found neither numeric, nor operator element
+		tests.add(new String[] { "", errValue1+valueSeparator }); // Found neither numeric, nor operator element
 
 		System.out.println("Evaluate:");
-		for (String test : tests) {
-			System.out.println(test.toString() + is + CalculatorEngine.elementsProcessor(test));
+		String result;
+		for (String[] test : tests) {
+			result = new CalculatorEngine(test[0]).elementsProcessor();
+			System.out.println(test[0].toString() + is + result + "\t- correct? " + result.equals(test[1].toString()));
 		}
 	}
 }
