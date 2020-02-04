@@ -1,20 +1,9 @@
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 public class CalculatorEngine {
 
-	final static String separator = "\\s";
-	final static String valueSeparator = ", ";
-	final static String errValue1 = "Found neither numeric, nor operator element";
-	final static String errValue2 = "There is no operator between values: ";
-	final static String errValue3 = "There is no value between operators: ";
-	final static String errValue4 = "Bracket not closed";
-	final static String errValue5 = "Closing bracket unnecessary";
-	final static String errValue6 = "Found no numeric value in operation";
-	final static String errDivZero = "Cannot divide by zero";
-	final static String nonNumerics = "[^\\d.]";
+	final static String expressionSeparator = "\\s";
 
 	public CalculatorEngine(String expression) {
 		setX(expression);
@@ -30,7 +19,7 @@ public class CalculatorEngine {
 		CalculatorEngine.x = x;
 	}
 
-	public String elementsProcessor() {
+	String elementsProcessor() {
 
 		String expression = CalculatorEngine.getX();
 
@@ -41,7 +30,7 @@ public class CalculatorEngine {
 		else
 			checkedExpression = expression;
 
-		String[] elements = checkedExpression.split(separator);
+		String[] elements = checkedExpression.split(expressionSeparator);
 		Stack<String> values = new Stack<>();
 		Stack<String> operators = new Stack<>();
 		Stack<String> bracketOpen = new Stack<>();
@@ -53,15 +42,15 @@ public class CalculatorEngine {
 
 			// If neither numeric nor operator recognized, returns error communicate
 			if (!checkBigDecimal(elements[i]) && !checkOperatorOrBracket(elements[i]))
-				return errValue1.concat(valueSeparator).concat(elements[i]);
+				return Errors.ERR_VAL_1.getErrDesc().concat(elements[i]);
 
 			// error, if between values there is no operator
 			if (!checkIfLastElement(elements, i) && checkBigDecimal(elements[i]) && checkBigDecimal(elements[i + 1]))
-				return errValue2.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]);
+				return Errors.ERR_VAL_2.getErrDesc().concat(elements[i]).concat(Errors.ERR_SEP.getErrDesc()).concat(elements[i + 1]);
 
 			// error, if between operators there is no value
 			if (!checkIfLastElement(elements, i) && checkOperator(elements[i]) && checkOperator(elements[i + 1]))
-				return errValue3.concat(elements[i]).concat(valueSeparator).concat(elements[i + 1]);
+				return Errors.ERR_VAL_3.getErrDesc().concat(elements[i]).concat(Errors.ERR_SEP.getErrDesc()).concat(elements[i + 1]);
 
 			else if (checkSeparator(elements[i]))
 				continue;
@@ -77,7 +66,7 @@ public class CalculatorEngine {
 			// till open bracket "("
 			{
 				if (bracketOpen.empty())
-					return errValue5;
+					return Errors.ERR_VAL_5.getErrDesc();
 				while (!operators.peek().equals("("))
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
@@ -107,7 +96,7 @@ public class CalculatorEngine {
 			}
 		}
 		if (!bracketOpen.empty())
-			return errValue4; // if bracket not closed
+			return Errors.ERR_VAL_4.getErrDesc(); // if bracket not closed
 		while (!operators.empty())
 			values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 		return values.pop();
@@ -130,7 +119,7 @@ public class CalculatorEngine {
 		try {
 			return new BigDecimal(testedElement);
 		} catch (NumberFormatException e) {
-			return new BigDecimal(testedElement.replaceAll(nonNumerics, null));
+			return new BigDecimal(testedElement.replaceAll(Errors.ERR_VAL_8.getErrDesc(), null));
 		}
 	}
 
@@ -167,7 +156,7 @@ public class CalculatorEngine {
 	}
 
 	private boolean checkSeparator(String testedElement) {
-		if (testedElement.equals(separator))
+		if (testedElement.equals(expressionSeparator))
 			return true;
 		else
 			return false;
@@ -200,11 +189,11 @@ public class CalculatorEngine {
 		if (checkBigDecimal(a)) {
 			aBD = stringToBD(a);
 		} else
-			return errValue6;
+			return Errors.ERR_VAL_6.getErrDesc();
 		if (checkBigDecimal(b)) {
 			bBD = stringToBD(b);
 		} else
-			return errValue6;
+			return Errors.ERR_VAL_6.getErrDesc();
 
 		switch (op) {
 		case "+":
@@ -215,7 +204,7 @@ public class CalculatorEngine {
 			return aBD.multiply(bBD).toPlainString();
 		case "/":
 			if (bBD.equals(BigDecimal.ZERO))
-				return errDivZero;
+				return Errors.ERR_VAL_7.getErrDesc();
 			else
 				return aBD.divide(bBD).toPlainString();
 		case "^":
@@ -224,53 +213,53 @@ public class CalculatorEngine {
 		return BigDecimal.ZERO.toPlainString();
 	}
 
-	public static void main(String[] args) {
-		// Main method to test calculation
-
-		String is = " = ";
-
-		List<String[]> tests = new ArrayList<>();
-		tests.add(new String[] { "127", "127" }); // 127
-		tests.add(new String[] { "-127", "-127" }); // -127
-		tests.add(new String[] { "2 + 3", "5" }); // 5
-		tests.add(new String[] { "2 + 3 +  4", "9" }); // 9
-		tests.add(new String[] { "  7  + 3 -   4", "6" }); // 6
-		tests.add(new String[] { "2 + 3 + 4 + 5", "14" }); // 14
-		tests.add(new String[] { "2 - 6", "-4" }); // -4
-		tests.add(new String[] { "2 - 3 - 4", "-5" }); // -5
-		tests.add(new String[] { "10 * 5 / 5", "10" }); // 10
-		tests.add(new String[] { "10 - 2 * 3", "4" }); // 4
-		tests.add(new String[] { "10 * 2 ^ 3", "80" }); // 80
-		tests.add(new String[] { "2 * ( 5 - 2 ) ^ 3", "54" }); // 54
-		tests.add(new String[] { "10 * 5 / 0", errDivZero }); // "Cannot divide by zero"
-		tests.add(new String[] { "22 * 10 / ( 5 - ( 2 + 3 ) )", errDivZero }); // "Cannot divide by zero"
-		tests.add(new String[] { "2 / 2 + 3 * 4", "13" }); // 13
-		tests.add(new String[] { "5 / ( 2 + 3 ) * ( 5 - 1 )", "4" }); // 4
-		tests.add(new String[] { "1 + 20 / ( ( 2 + 3 ) * ( 4 - 2 ) )", "3" }); // 3
-		tests.add(new String[] { "20 / ( ( 2 + 3 ) * ( 4 - 2 ) ^ 3 )", "0.5" }); // 0.5
-		tests.add(new String[] { "7.7 - 3.3 - 4.4", "0.0" }); // 0.0
-		tests.add(new String[] { "8.8 - 3.3 - .4", "5.1" }); // 5.1
-		tests.add(new String[] { "100 * ( 2 + 12 )", "1400" }); // 1400
-		tests.add(new String[] { "100 * ( 2.1 + 12 ) / 20 + 2", "72.5" }); // 72.5
-		tests.add(new String[] { "-10 * ( 2.5 - 1.1 )", "-14.0" }); // -14.0
-		tests.add(new String[] { "1.652335819E9", "1.652335819E9" }); // 1.652335819E9
-		tests.add(new String[] { "-2.4323387584534e11", "-2.4323387584534e11" }); // -2.4323387584534e11
-		tests.add(new String[] { "-4.4323387584534exp9", errValue1+valueSeparator+"-4.4323387584534exp9" }); // Found neither numeric, nor operator element
-		tests.add(new String[] { "12 + 3oo - 5", errValue1+valueSeparator+"3oo" }); // Found neither numeric, nor operator element
-		tests.add(new String[] { "3.5 - 1,3 - .4", errValue1+valueSeparator+"1,3" }); // Found neither numeric, nor operator element
-		tests.add(new String[] { "1 # 2 - .4", errValue1+valueSeparator+"#" }); // Found neither numeric, nor operator element
-		tests.add(new String[] { "1 * * 2 - .4", errValue3+"*"+valueSeparator+"*" }); // There is no value between operators
-		tests.add(new String[] { "-10  2.5 - 1.1 )", errValue2+"-10"+valueSeparator+"2.5" }); // There is no operator between values :
-		tests.add(new String[] { "-10 *  ( ( 2.5 - 1.1 )", errValue4 }); // Bracket not closed
-		tests.add(new String[] { "-10 * ( 2.5 - 1.1 ) ) )", errValue5 }); // Closing bracket unnecessary
-		tests.add(new String[] { " ", errValue1+valueSeparator }); // Found neither numeric, nor operator element
-		tests.add(new String[] { "", errValue1+valueSeparator }); // Found neither numeric, nor operator element
-
-		System.out.println("Evaluate:");
-		String result;
-		for (String[] test : tests) {
-			result = new CalculatorEngine(test[0]).elementsProcessor();
-			System.out.println(test[0].toString() + is + result + "\t- correct? " + result.equals(test[1].toString()));
-		}
-	}
+//	public static void main(String[] args) {
+//		// Main method to test calculation
+//
+//		String is = " = ";
+//
+//		List<String[]> tests = new ArrayList<>();
+//		tests.add(new String[] { "127", "127" }); // 127
+//		tests.add(new String[] { "-127", "-127" }); // -127
+//		tests.add(new String[] { "2 + 3", "5" }); // 5
+//		tests.add(new String[] { "2 + 3 +  4", "9" }); // 9
+//		tests.add(new String[] { "  7  + 3 -   4", "6" }); // 6
+//		tests.add(new String[] { "2 + 3 + 4 + 5", "14" }); // 14
+//		tests.add(new String[] { "2 - 6", "-4" }); // -4
+//		tests.add(new String[] { "2 - 3 - 4", "-5" }); // -5
+//		tests.add(new String[] { "10 * 5 / 5", "10" }); // 10
+//		tests.add(new String[] { "10 - 2 * 3", "4" }); // 4
+//		tests.add(new String[] { "10 * 2 ^ 3", "80" }); // 80
+//		tests.add(new String[] { "2 * ( 5 - 2 ) ^ 3", "54" }); // 54
+//		tests.add(new String[] { "10 * 5 / 0", errDivZero }); // "Cannot divide by zero"
+//		tests.add(new String[] { "22 * 10 / ( 5 - ( 2 + 3 ) )", errDivZero }); // "Cannot divide by zero"
+//		tests.add(new String[] { "2 / 2 + 3 * 4", "13" }); // 13
+//		tests.add(new String[] { "5 / ( 2 + 3 ) * ( 5 - 1 )", "4" }); // 4
+//		tests.add(new String[] { "1 + 20 / ( ( 2 + 3 ) * ( 4 - 2 ) )", "3" }); // 3
+//		tests.add(new String[] { "20 / ( ( 2 + 3 ) * ( 4 - 2 ) ^ 3 )", "0.5" }); // 0.5
+//		tests.add(new String[] { "7.7 - 3.3 - 4.4", "0.0" }); // 0.0
+//		tests.add(new String[] { "8.8 - 3.3 - .4", "5.1" }); // 5.1
+//		tests.add(new String[] { "100 * ( 2 + 12 )", "1400" }); // 1400
+//		tests.add(new String[] { "100 * ( 2.1 + 12 ) / 20 + 2", "72.5" }); // 72.5
+//		tests.add(new String[] { "-10 * ( 2.5 - 1.1 )", "-14.0" }); // -14.0
+//		tests.add(new String[] { "1.652335819E9", "1.652335819E9" }); // 1.652335819E9
+//		tests.add(new String[] { "-2.4323387584534e11", "-2.4323387584534e11" }); // -2.4323387584534e11
+//		tests.add(new String[] { "-4.4323387584534exp9", errValue1+valueSeparator+"-4.4323387584534exp9" }); // Found neither numeric, nor operator element
+//		tests.add(new String[] { "12 + 3oo - 5", errValue1+valueSeparator+"3oo" }); // Found neither numeric, nor operator element
+//		tests.add(new String[] { "3.5 - 1,3 - .4", errValue1+valueSeparator+"1,3" }); // Found neither numeric, nor operator element
+//		tests.add(new String[] { "1 # 2 - .4", errValue1+valueSeparator+"#" }); // Found neither numeric, nor operator element
+//		tests.add(new String[] { "1 * * 2 - .4", errValue3+"*"+valueSeparator+"*" }); // There is no value between operators
+//		tests.add(new String[] { "-10  2.5 - 1.1 )", errValue2+"-10"+valueSeparator+"2.5" }); // There is no operator between values :
+//		tests.add(new String[] { "-10 *  ( ( 2.5 - 1.1 )", errValue4 }); // Bracket not closed
+//		tests.add(new String[] { "-10 * ( 2.5 - 1.1 ) ) )", errValue5 }); // Closing bracket unnecessary
+//		tests.add(new String[] { " ", errValue1+valueSeparator }); // Found neither numeric, nor operator element
+//		tests.add(new String[] { "", errValue1+valueSeparator }); // Found neither numeric, nor operator element
+//
+//		System.out.println("Evaluate:");
+//		String result;
+//		for (String[] test : tests) {
+//			result = new CalculatorEngine(test[0]).elementsProcessor();
+//			System.out.println(test[0].toString() + is + result + "\t- correct? " + result.equals(test[1].toString()));
+//		}
+//	}
 }
