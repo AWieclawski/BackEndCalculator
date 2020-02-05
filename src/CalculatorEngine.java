@@ -169,7 +169,7 @@ public class CalculatorEngine {
 			return false;
 	}
 
-	public boolean higherPriorityOp(String previousOp, String followingOp)
+	private boolean higherPriorityOp(String previousOp, String followingOp)
 	// If 'followingOp' has higher or the same operation priority as 'previousOp',
 	// returns true. Otherwise returns false.
 	{
