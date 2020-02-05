@@ -119,7 +119,7 @@ public class CalculatorEngine {
 		try {
 			return new BigDecimal(testedElement);
 		} catch (NumberFormatException e) {
-			return new BigDecimal(testedElement.replaceAll(Errors.ERR_VAL_8.getErrDesc(), null));
+			return new BigDecimal(testedElement.replaceAll(Errors.ERR_VAL_8.getErrDesc(), ""));
 		}
 	}
 
