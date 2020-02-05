@@ -181,7 +181,7 @@ public class CalculatorEngine {
 			return true;
 	}
 
-	public String workingOnStacks(String op, String b, String a)
+	private String workingOnStacks(String op, String b, String a)
 	// Apply an operator 'op' on operands 'a' and 'b'.
 	// Returns the result.
 	{
