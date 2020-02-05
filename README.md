@@ -7,4 +7,4 @@ Handles the following errors:
 - bracket not closed";
 - no numeric value in operation";
 - divide by zero;
-- unnecessary closing bracket. 
+- unnecessary closing bracket.
