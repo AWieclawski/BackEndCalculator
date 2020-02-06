@@ -43,15 +43,15 @@ public class CalculatorEngine {
 
 			// If neither numeric nor operator recognized, returns error communicate
 			if (!checkBigDecimal(elements[i]) && !checkOperatorOrBracket(elements[i]))
-				return Errors.ERR_VAL_1.getErrDesc().concat(elements[i]);
+				return Errors.ERR_1.getErrDesc().concat(elements[i]);
 
 			// error, if between values there is no operator
 			if (!checkIfLastElement(elements, i) && checkBigDecimal(elements[i]) && checkBigDecimal(elements[i + 1]))
-				return Errors.ERR_VAL_2.getErrDesc().concat(elements[i]).concat(Errors.ERR_SEP.getErrDesc()).concat(elements[i + 1]);
+				return Errors.ERR_2.getErrDesc().concat(elements[i]).concat(Errors.ERR_SEP.getErrDesc()).concat(elements[i + 1]);
 
 			// error, if between operators there is no value
 			if (!checkIfLastElement(elements, i) && checkOperator(elements[i]) && checkOperator(elements[i + 1]))
-				return Errors.ERR_VAL_3.getErrDesc().concat(elements[i]).concat(Errors.ERR_SEP.getErrDesc()).concat(elements[i + 1]);
+				return Errors.ERR_3.getErrDesc().concat(elements[i]).concat(Errors.ERR_SEP.getErrDesc()).concat(elements[i + 1]);
 
 			else if (checkSeparator(elements[i]))
 				continue;
@@ -67,7 +67,7 @@ public class CalculatorEngine {
 			// till open bracket "("
 			{
 				if (bracketOpen.empty())
-					return Errors.ERR_VAL_5.getErrDesc();
+					return Errors.ERR_5.getErrDesc();
 				while (!operators.peek().equals("("))
 					values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 				// remove start bracket "(" from 'operators' stack
@@ -97,7 +97,7 @@ public class CalculatorEngine {
 			}
 		}
 		if (!bracketOpen.empty())
-			return Errors.ERR_VAL_4.getErrDesc(); // if bracket not closed
+			return Errors.ERR_4.getErrDesc(); // if bracket not closed
 		while (!operators.empty())
 			values.push(workingOnStacks(operators.pop(), values.pop(), values.pop()));
 		return values.pop();
@@ -190,11 +190,11 @@ public class CalculatorEngine {
 		if (checkBigDecimal(a)) {
 			aBD = stringToBD(a);
 		} else
-			return Errors.ERR_VAL_6.getErrDesc();
+			return Errors.ERR_6.getErrDesc();
 		if (checkBigDecimal(b)) {
 			bBD = stringToBD(b);
 		} else
-			return Errors.ERR_VAL_6.getErrDesc();
+			return Errors.ERR_6.getErrDesc();
 
 		switch (op) {
 		case "+":
@@ -205,7 +205,7 @@ public class CalculatorEngine {
 			return aBD.multiply(bBD).toPlainString();
 		case "/":
 			if (bBD.equals(BigDecimal.ZERO))
-				return Errors.ERR_VAL_7.getErrDesc();
+				return Errors.ERR_7.getErrDesc();
 			else
 				return aBD.divide(bBD).toPlainString();
 		case "^":
