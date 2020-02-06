@@ -7,8 +7,7 @@ public enum Errors {
 	ERR_VAL_4("Bracket not closed"),
 	ERR_VAL_5("Closing bracket unnecessary"),
 	ERR_VAL_6("Found no numeric value in operation"),
-	ERR_VAL_7("Cannot divide by zero"),
-	ERR_VAL_8("[^\\d.]");
+	ERR_VAL_7("Cannot divide by zero");
 	
 	private String errDesc;
 

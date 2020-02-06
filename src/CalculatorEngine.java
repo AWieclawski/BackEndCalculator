@@ -4,6 +4,7 @@ import java.util.Stack;
 public class CalculatorEngine {
 
 	final static String expressionSeparator = "\\s";
+	final static String notDigits = "[^\\d.]";
 
 	public CalculatorEngine(String expression) {
 		setX(expression);
@@ -118,8 +119,8 @@ public class CalculatorEngine {
 	private BigDecimal stringToBD(String testedElement) {
 		try {
 			return new BigDecimal(testedElement);
-		} catch (NumberFormatException e) {
-			return new BigDecimal(testedElement.replaceAll(Errors.ERR_VAL_8.getErrDesc(), ""));
+		} catch (NumberFormatException e) {// returns only readable digits in the most unlikely event
+			return new BigDecimal(testedElement.replaceAll(notDigits, ""));
 		}
 	}
 
