@@ -5,7 +5,7 @@ public enum Errors {
 	ERR_VAL_2("There is no operator between values: "),
 	ERR_VAL_3("There is no value between operators: "),
 	ERR_VAL_4("Bracket not closed"),
-	ERR_VAL_5("Closing bracket unnecessary"),
+	ERR_VAL_5("To many closing brackets"),
 	ERR_VAL_6("Found no numeric value in operation"),
 	ERR_VAL_7("Cannot divide by zero");
 	
