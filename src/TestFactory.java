@@ -8,7 +8,7 @@ public class TestFactory {
 		String is = " = ";
 		String result;
 		int countTests = 1;
-		for (String[] test : Samples.samplesList()) {
+		for (String[] test : Samples.getSamplesList()) {
 			result = new CalculatorEngine(test[0]).elementsProcessor();
 			System.out.printf("\n%s) %s %s %s \n- correct? %s\n",
 					countTests,

@@ -43,7 +43,7 @@ private static String[][]sampArr = new String[][] {
 		{ "", Errors.ERR_1.getErrDesc() } // Found neither numeric, nor operator element
 	};
 
-	public static List<String[]> samplesList() {
+	static List<String[]> getSamplesList() {
 		
 		for (String[]s:sampArr) tests.add(s);
 		
